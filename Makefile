@@ -1,23 +1,28 @@
-all: 
-	mkdir -p /home/mfeldman/data/mariadb
-	mkdir -p /home/mfeldman/data/wordpress
-	docker compose -f ./srcs/docker-compose.yml up --build -d
-	@clear
+all:
+	@sudo mkdir -p /home/mfroissa/data/db /home/mfroissa/data/wordpress
+	@docker compose -f ./srcs/docker-compose.yml up --build -d
 
-logs:
-	docker logs wordpress
-	docker logs mariadb
-	docker logs nginx
+install :
+	@sudo apt-get update 
+	@sudo apt-get upgrade -y
+	@sudo apt-get install -y curl gnupg ca-certificates lsb-release docker.io docker
+	@sudo mkdir -p /home/mfroissa/data/db /home/mfroissa/data/wordpress
 
-clean:
-	docker compose -f ./srcs/docker-compose.yml down;
+reboot :
+	@sudo reboot
+	@sleep 60 # Wait for 60 seconds for the system to reboot
 
-fclean: clean
-	sudo rm -rf /home/mfeldman/data/mariadb/*
-	sudo rm -rf /home/mfeldman/data/wordpress/*
-	-docker system prune -af
-	@clear	
+check_db:
+	@docker exec -it mariadb mysql -u root -p
 
-re: fclean all
+down:
+	@docker compose -f ./srcs/docker-compose.yml down
 
-.Phony: all logs clean fclean
+clean: down
+	@docker system prune -a
+	@docker volume rm -f $$(docker volume ls -q)
+	@sudo rm -rf /home/mfroissa/data
+	#@docker network rm mynetwork
+
+
+.PHONY: all clean install restart down

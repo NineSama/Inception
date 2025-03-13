@@ -1,13 +1,13 @@
-FROM	debian:bullseye
+FROM debian:bullseye
 
-RUN apt-get update -y && apt-get upgrade -y
+RUN apt-get update -y && apt upgrade -y
+
 RUN apt-get install -y mariadb-server
 
-COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY /conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 
-EXPOSE 3306
+COPY tools/script.sh /
 
-COPY ./tools/autoconfig.sh ./
-RUN chmod 755 ./autoconfig.sh
+RUN chmod +x /script.sh
 
-CMD		["./autoconfig.sh"]
+ENTRYPOINT [ "/script.sh" ]
